@@ -1,0 +1,30 @@
+# Secrets: only .env.example (placeholders) is committed
+.env
+backend/.env
+*.env.local
+
+# Data pack stays local: database + product images (see README)
+data/
+*.db
+*.sqlite
+*.sqlite3
+
+# Zips and bundles
+*.zip
+
+# Build output and dependencies
+node_modules/
+frontend/dist/
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Audit trail temp/backup files (the audit_trail.json itself IS committed)
+output/*.tmp
+output/audit_trail.corrupt-*.json
+
+# Editors / macOS
+.DS_Store
+.vscode/
+.idea/

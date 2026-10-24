@@ -1,0 +1,1512 @@
+/* ==========================================================================
+   Campus Customs: "Game-day stitching"
+   A Yale shop on Broadway, dressed in its own materials: Yale-blue felt,
+   chenille letters, stitched seams, kraft hang tags, heather-gray fleece.
+   Design notes: output/design.md
+   ========================================================================== */
+
+:root {
+  /* Color */
+  --yale: #00356b;          /* felt: nav, hero, chat, "pulled for you" band */
+  --yale-deep: #002550;     /* felt shadow / pressed */
+  --yale-bright: #286dc0;   /* focus + links on light */
+  --ink: #10233f;           /* text */
+  --muted: #56657a;
+  --heather: #e6e9ee;       /* page: sweatshirt heather */
+  --chalk: #ffffff;         /* stitching, card fields */
+  --kraft: #d9b985;         /* hang tags */
+  --kraft-ink: #4a3818;
+  --crimson: #a51c30;       /* sold out (the rival's color) */
+  --low: #8a5a00;
+  --ok: #24613f;
+  --line: #d3d9e2;
+
+  /* Stitching */
+  --stitch: 2px dashed rgba(255, 255, 255, 0.75);
+  --stitch-blue: 2px dashed rgba(0, 53, 107, 0.45);
+
+  /* Type */
+  --varsity: 'Graduate', 'Rockwell', 'Georgia', serif;
+  --sans: 'Libre Franklin', 'Franklin Gothic Medium', 'Helvetica Neue', Arial, sans-serif;
+
+  /* Felt + heather texture (inline SVG noise, nothing to download) */
+  --noise: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .55 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+
+  --radius: 6px;
+  color-scheme: light;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: var(--sans);
+  font-size: 1rem;
+  color: var(--ink);
+  background-color: var(--heather);
+  background-image: var(--noise);
+  background-size: 160px;
+  background-blend-mode: soft-light;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+a {
+  color: var(--yale);
+}
+
+:focus-visible {
+  outline: 3px solid var(--yale-bright);
+  outline-offset: 2px;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--varsity);
+  font-weight: 400;
+  line-height: 1.08;
+  margin: 0 0 0.45em;
+  letter-spacing: 0.01em;
+}
+
+h1 {
+  font-size: clamp(2.1rem, 4.4vw, 3.1rem);
+}
+
+h2 {
+  font-size: clamp(1.5rem, 2.6vw, 1.95rem);
+}
+
+h3 {
+  font-size: 1.15rem;
+}
+
+.app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.main {
+  flex: 1;
+}
+
+.muted {
+  color: var(--muted);
+}
+
+.small {
+  font-size: 0.9rem;
+}
+
+/* Felt: every Yale-blue surface gets the same subtle fibre texture */
+.nav,
+.hero,
+.chat-header,
+.chat-toggle,
+.chat-results,
+.footer {
+  background-color: var(--yale);
+  background-image: var(--noise);
+  background-size: 160px;
+  background-blend-mode: overlay;
+}
+
+/* ---------- Nav ---------- */
+.nav {
+  color: var(--chalk);
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.15);
+}
+
+.nav-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0.7rem 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: var(--chalk);
+  text-decoration: none;
+}
+
+/* A sewn-on patch */
+.brand-mark {
+  width: 46px;
+  height: 46px;
+  display: grid;
+  place-items: center;
+  font-family: var(--varsity);
+  font-size: 1.15rem;
+  background: var(--chalk);
+  color: var(--yale);
+  border-radius: 8px;
+  outline: 2px dashed var(--yale);
+  outline-offset: -6px;
+  transform: rotate(-3deg);
+  box-shadow: 0 2px 0 var(--yale-deep);
+}
+
+.brand-text {
+  font-family: var(--varsity);
+  font-size: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  line-height: 1.05;
+}
+
+.brand-text small {
+  font-family: var(--sans);
+  font-size: 0.74rem;
+  font-weight: 500;
+  opacity: 0.8;
+  letter-spacing: 0.01em;
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+  flex-wrap: wrap;
+}
+
+.nav-link {
+  color: rgba(255, 255, 255, 0.86);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.95rem;
+  padding: 0.45rem 0.75rem;
+  border-radius: 6px;
+  border-bottom: 2px solid transparent;
+}
+
+.nav-link:hover {
+  color: var(--chalk);
+}
+
+/* Active page: a stitched underline */
+.nav-link.active {
+  color: var(--chalk);
+  border-radius: 0;
+  border-bottom: var(--stitch);
+}
+
+.nav-cta,
+.nav-cta.active {
+  background: var(--chalk);
+  color: var(--yale);
+  margin-left: 0.4rem;
+  border-radius: 6px;
+  border-bottom-color: transparent;
+}
+
+.nav-cta:hover {
+  color: var(--yale-deep);
+  background: #edf2f8;
+}
+
+.nav-user {
+  color: rgba(255, 255, 255, 0.86);
+  font-size: 0.95rem;
+  padding: 0 0.5rem 0 0.9rem;
+  border-left: 1px dashed rgba(255, 255, 255, 0.4);
+  margin-left: 0.4rem;
+}
+
+.nav-button {
+  background: none;
+  border: 2px dashed rgba(255, 255, 255, 0.5);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* ---------- Buttons & links ---------- */
+.btn {
+  display: inline-block;
+  padding: 0.8rem 1.4rem;
+  border-radius: 6px;
+  font: inherit;
+  font-weight: 700;
+  text-decoration: none;
+  border: 2px solid transparent;
+  cursor: pointer;
+  text-align: center;
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+
+.btn:active {
+  transform: translateY(1px);
+}
+
+.btn-light {
+  background: var(--chalk);
+  color: var(--yale);
+  box-shadow: 0 3px 0 var(--yale-deep);
+}
+
+.btn-ghost {
+  border: var(--stitch);
+  color: var(--chalk);
+}
+
+.btn-dark {
+  background: var(--yale);
+  color: var(--chalk);
+  box-shadow: 0 3px 0 var(--yale-deep);
+}
+
+.btn-dark:hover {
+  background: var(--yale-deep);
+}
+
+.btn:disabled {
+  opacity: 0.65;
+  cursor: default;
+}
+
+.btn.full {
+  width: 100%;
+}
+
+.text-link {
+  font-weight: 700;
+  text-decoration: none;
+  color: var(--yale);
+}
+
+.text-link:hover {
+  text-decoration: underline;
+  text-decoration-style: dashed;
+  text-underline-offset: 4px;
+}
+
+/* ---------- Hero: the stitched chenille wordmark ---------- */
+.hero {
+  color: var(--chalk);
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 3.5rem 1.25rem 4rem;
+}
+
+.hero-kicker {
+  font-weight: 600;
+  font-size: 0.95rem;
+  margin: 0 0 1.25rem;
+  opacity: 0.85;
+}
+
+.hero-title {
+  margin: 0 0 1.75rem;
+  max-width: 1100px;
+}
+
+.wordmark {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.wordmark text {
+  font-family: var(--varsity);
+  font-size: 150px;
+}
+
+.wordmark-depth {
+  fill: var(--yale-deep);
+}
+
+.wordmark-fill {
+  fill: var(--chalk);
+}
+
+.wordmark-stitch {
+  fill: none;
+  stroke: var(--yale);
+  stroke-width: 2.6;
+  stroke-dasharray: 9 7;
+  stroke-linecap: round;
+}
+
+/* The one orchestrated moment: the letters fill in like embroidery, then the stitching sews around them. */
+.wordmark-fill-rect {
+  transform-origin: 0 100%;
+  transform-box: fill-box;
+  animation: embroider 1.1s cubic-bezier(0.6, 0, 0.2, 1) 0.15s both;
+}
+
+.wordmark-stitch {
+  animation: sew 1.6s ease-out 0.9s both;
+}
+
+@keyframes embroider {
+  from {
+    transform: scaleY(0);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+
+@keyframes sew {
+  from {
+    stroke-dashoffset: 160;
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+}
+
+.hero-sub {
+  font-size: 1.12rem;
+  max-width: 54ch;
+  margin: 0;
+  opacity: 0.92;
+}
+
+.hero-actions {
+  display: flex;
+  gap: 0.85rem;
+  margin-top: 1.9rem;
+  flex-wrap: wrap;
+}
+
+/* A seam along the bottom edge of the felt */
+.hero-seam {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 12px;
+  border-top: var(--stitch);
+  opacity: 0.6;
+}
+
+/* ---------- Layout ---------- */
+.section,
+.page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 3rem 1.25rem;
+}
+
+.page.narrow {
+  max-width: 740px;
+}
+
+.section-head,
+.page-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.section-head h2,
+.page-head h1 {
+  margin: 0;
+}
+
+.eyebrow {
+  font-weight: 700;
+  font-size: 0.9rem;
+  margin: 0 0 0.6rem;
+  color: var(--yale-bright);
+  text-transform: capitalize;
+}
+
+.values {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 2rem;
+}
+
+.values > div {
+  border-top: var(--stitch-blue);
+  padding-top: 1.1rem;
+}
+
+.values p {
+  margin: 0;
+  color: var(--muted);
+}
+
+.band {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1.5rem;
+  background: var(--chalk);
+  border-radius: var(--radius);
+  outline: var(--stitch-blue);
+  outline-offset: -10px;
+  padding: 2.2rem 2.4rem;
+  flex-wrap: wrap;
+}
+
+.band h2 {
+  margin-bottom: 0.3rem;
+}
+
+.band p {
+  margin: 0;
+  color: var(--muted);
+}
+
+.notice {
+  background: var(--chalk);
+  border-left: 4px solid var(--yale);
+  padding: 0.8rem 1rem;
+  border-radius: 4px;
+}
+
+/* ---------- Product cards: merch on a hang tag ---------- */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(232px, 1fr));
+  gap: 2.25rem 1.5rem;
+}
+
+.card {
+  text-decoration: none;
+  color: inherit;
+  display: flex;
+  flex-direction: column;
+}
+
+.card-image {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  background: var(--chalk);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: 0 1px 0 var(--line);
+}
+
+.card-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 0.8rem;
+  transition: transform 0.35s ease;
+}
+
+.card:hover .card-image img {
+  transform: scale(1.04);
+}
+
+/* Kraft hang tag, notched at the top like a real tag, hanging on a string */
+.tag {
+  position: relative;
+  margin: 1.1rem 0.6rem 0;
+  padding: 1.15rem 1rem 0.95rem;
+  background-color: var(--kraft);
+  background-image: var(--noise);
+  background-size: 120px;
+  background-blend-mode: soft-light;
+  color: var(--kraft-ink);
+  clip-path: polygon(14px 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 0 100%, 0 14px);
+  transform-origin: 50% 0;
+  transition: transform 0.4s cubic-bezier(0.3, 1.6, 0.5, 1);
+}
+
+/* The string, drawn from the photo down to the tag's punched hole */
+.card-image::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: -1.1rem;
+  height: 1.6rem;
+  border-left: 1.5px solid #8b7a5c;
+  z-index: 1;
+}
+
+.card:hover .tag,
+.card:focus-visible .tag {
+  transform: rotate(-2.5deg);
+}
+
+.tag-hole {
+  position: absolute;
+  top: 0.35rem;
+  left: 50%;
+  width: 10px;
+  height: 10px;
+  margin-left: -5px;
+  border-radius: 50%;
+  background: var(--heather);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.35);
+}
+
+.tag-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.75rem;
+}
+
+.tag h3 {
+  font-family: var(--sans);
+  font-size: 0.98rem;
+  font-weight: 700;
+  margin: 0 0 0.35rem;
+  letter-spacing: 0;
+  line-height: 1.25;
+  color: var(--ink);
+}
+
+.tag p {
+  margin: 0;
+  font-size: 0.86rem;
+  line-height: 1.45;
+}
+
+.price {
+  font-family: var(--varsity);
+  font-size: 1.1rem;
+  color: var(--yale);
+  white-space: nowrap;
+}
+
+/* Sold out: a crimson rubber stamp */
+.stamp,
+.badge-out {
+  font-family: var(--varsity);
+  color: var(--crimson);
+  border: 3px double var(--crimson);
+  border-radius: 4px;
+  padding: 0.15rem 0.6rem;
+  background: rgba(255, 255, 255, 0.85);
+  letter-spacing: 0.04em;
+}
+
+.stamp {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  font-size: 1.35rem;
+  transform: translate(-50%, -50%) rotate(-12deg);
+}
+
+.card-sold-out img {
+  filter: grayscale(0.7);
+  opacity: 0.75;
+}
+
+.badge-out.inline {
+  font-size: 0.85rem;
+  margin-left: 0.5rem;
+  display: inline-block;
+  transform: rotate(-4deg);
+  vertical-align: middle;
+}
+
+/* ---------- Products page filters ---------- */
+.search {
+  font: inherit;
+  padding: 0.7rem 0.95rem;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  min-width: min(320px, 100%);
+  background: var(--chalk);
+}
+
+.filters {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  margin-bottom: 2rem;
+}
+
+.chips-row {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+/* Category chips are little felt patches */
+.filter-chip {
+  font: inherit;
+  font-size: 0.92rem;
+  font-weight: 600;
+  background: var(--chalk);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 0.45rem 0.9rem;
+  cursor: pointer;
+}
+
+.filter-chip:hover {
+  border-color: var(--yale);
+}
+
+.filter-chip.on {
+  background: var(--yale);
+  color: var(--chalk);
+  border-color: var(--yale);
+  outline: 1.5px dashed rgba(255, 255, 255, 0.7);
+  outline-offset: -5px;
+}
+
+.chip-count {
+  font-size: 0.78rem;
+  opacity: 0.6;
+  margin-left: 0.2rem;
+}
+
+.filter-selects {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.filter-selects label {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.92rem;
+  color: var(--muted);
+}
+
+.filter-selects select {
+  font: inherit;
+  font-size: 0.92rem;
+  padding: 0.45rem 0.6rem;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--chalk);
+  color: var(--ink);
+}
+
+.clear-filters,
+.inline-btn {
+  background: none;
+  border: none;
+  font: inherit;
+  font-weight: 700;
+  color: var(--yale);
+  cursor: pointer;
+  padding: 0;
+}
+
+/* ---------- Product detail ---------- */
+.back {
+  display: inline-block;
+  margin-bottom: 1.25rem;
+}
+
+.detail {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+  gap: 3rem;
+  align-items: start;
+}
+
+.detail-image {
+  background: var(--chalk);
+  border-radius: var(--radius);
+  padding: 2rem;
+  position: sticky;
+  top: 96px;
+  outline: var(--stitch-blue);
+  outline-offset: -12px;
+}
+
+.detail-image img {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: contain;
+}
+
+.detail-info h1 {
+  margin-bottom: 0.6rem;
+}
+
+/* The price on a big hang tag */
+.detail-price {
+  position: relative;
+  display: inline-block;
+  font-family: var(--varsity);
+  font-size: 1.8rem;
+  color: var(--yale);
+  background-color: var(--kraft);
+  background-image: var(--noise);
+  background-size: 120px;
+  background-blend-mode: soft-light;
+  padding: 0.35rem 1.1rem 0.35rem 2.1rem;
+  margin: 0 0 1.25rem;
+  clip-path: polygon(16px 0, 100% 0, 100% 100%, 16px 100%, 0 50%);
+  transform: rotate(-2deg);
+}
+
+.detail-price .tag-hole {
+  top: 50%;
+  left: 1.05rem;
+  margin: -5px 0 0;
+}
+
+.detail-desc {
+  font-size: 1.06rem;
+  max-width: 60ch;
+}
+
+.detail-label {
+  font-family: var(--sans);
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--ink);
+  margin: 1.75rem 0 0.7rem;
+}
+
+.chips {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.chip {
+  border: 1px solid var(--line);
+  background: var(--chalk);
+  border-radius: 999px;
+  padding: 0.25rem 0.8rem;
+  font-size: 0.9rem;
+  text-transform: capitalize;
+}
+
+/* Sizes as jersey tiles */
+.sizes {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.6rem;
+  margin-bottom: 1.25rem;
+}
+
+.size {
+  position: relative;
+  background: var(--chalk);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 0.6rem 0.8rem;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.size strong {
+  font-family: var(--varsity);
+  font-weight: 400;
+  font-size: 1.6rem;
+  line-height: 1.1;
+  color: var(--yale);
+}
+
+.size span {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--ok);
+}
+
+.size-low span {
+  color: var(--low);
+}
+
+.size-out {
+  background: #f3f4f6;
+}
+
+.size-out strong {
+  color: #9aa3ae;
+}
+
+.size-out span {
+  color: var(--crimson);
+}
+
+.size-out::after {
+  /* crossed off, like a retired jersey number */
+  content: '';
+  position: absolute;
+  inset: 50% -10% auto;
+  border-top: 2px solid rgba(165, 28, 48, 0.55);
+  transform: rotate(-18deg);
+}
+
+/* ---------- About ---------- */
+.lead {
+  font-size: 1.22rem;
+}
+
+.page.narrow h2 {
+  margin-top: 2.4rem;
+}
+
+.checklist {
+  padding-left: 1.2rem;
+}
+
+.checklist li {
+  margin-bottom: 0.5rem;
+}
+
+.checklist li::marker {
+  color: var(--yale);
+}
+
+.visit {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  background: var(--chalk);
+  border-radius: var(--radius);
+  outline: var(--stitch-blue);
+  outline-offset: -8px;
+  padding: 1.4rem 1.6rem;
+  flex-wrap: wrap;
+}
+
+.visit p {
+  margin: 0.2rem 0 0;
+  color: var(--muted);
+}
+
+/* ---------- Auth forms ---------- */
+.auth {
+  display: flex;
+  justify-content: center;
+}
+
+.auth-card {
+  background: var(--chalk);
+  border-radius: var(--radius);
+  outline: var(--stitch-blue);
+  outline-offset: -10px;
+  padding: 2.4rem 2.2rem;
+  width: 100%;
+  max-width: 460px;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.auth-card h1 {
+  margin: 0;
+  font-size: 2rem;
+}
+
+.auth-card .muted {
+  margin: 0;
+}
+
+.auth-card label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-weight: 600;
+  font-size: 0.92rem;
+  min-width: 0;
+}
+
+.auth-card input {
+  width: 100%;
+  min-width: 0;
+  font: inherit;
+  padding: 0.7rem 0.8rem;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: #fbfcfd;
+}
+
+.hint {
+  font-weight: 400;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.hint-bad {
+  color: var(--crimson);
+}
+
+.error {
+  margin: 0;
+  background: #fbeeee;
+  border-left: 4px solid var(--crimson);
+  color: #7d2129;
+  padding: 0.65rem 0.9rem;
+  border-radius: 4px;
+  font-size: 0.92rem;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+/* ---------- Chat results: the felt band the chat lays products on ---------- */
+.chat-results {
+  color: var(--chalk);
+  scroll-margin-top: 76px;
+  border-bottom: 1px solid var(--yale-deep);
+  animation: results-in 0.4s ease-out;
+  position: relative;
+}
+
+.chat-results::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 10px;
+  border-top: var(--stitch);
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+@keyframes results-in {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.chat-results-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2.2rem 1.25rem 3rem;
+}
+
+.chat-results-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.results-kicker {
+  margin: 0 0 0.35rem;
+  font-weight: 600;
+  opacity: 0.8;
+}
+
+.chat-results-head h2 {
+  margin: 0 0 0.25rem;
+  color: var(--chalk);
+}
+
+.chat-results-head .muted {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.chat-results .tag-hole {
+  background: var(--yale);
+}
+
+.chat-results-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.chat-results-actions button {
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 700;
+  background: transparent;
+  color: var(--chalk);
+  border: var(--stitch);
+  border-radius: 6px;
+  padding: 0.35rem 0.85rem;
+  cursor: pointer;
+}
+
+.chat-results-actions button:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.chat-results.collapsed {
+  animation: none;
+}
+
+.chat-results.collapsed::after {
+  display: none;
+}
+
+.chat-results-bar {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0.6rem 1.25rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  font-size: 0.94rem;
+}
+
+/* ---------- Footer ---------- */
+.footer {
+  color: rgba(255, 255, 255, 0.86);
+  border-top: 6px solid var(--yale-deep);
+  overflow: hidden;
+}
+
+/* The address, as an outlined chenille letter stitched into the felt */
+.footer .footer-mark {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2.2rem 1.25rem 0;
+  font-family: var(--varsity);
+  font-size: clamp(3rem, 10vw, 7.5rem);
+  line-height: 0.95;
+  color: transparent;
+  -webkit-text-stroke: 1.5px rgba(255, 255, 255, 0.45);
+  white-space: nowrap;
+}
+
+.footer-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1.25rem 1.25rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  border-top: 2px dashed rgba(255, 255, 255, 0.35);
+}
+
+.footer strong {
+  font-family: var(--varsity);
+  font-weight: 400;
+  color: var(--chalk);
+}
+
+.footer p {
+  margin: 0.25rem 0 0;
+  font-size: 0.9rem;
+}
+
+.footer-links {
+  display: flex;
+  gap: 1.25rem;
+  align-items: center;
+}
+
+.footer a {
+  color: var(--chalk);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+/* ---------- Chat: "Ask the counter" ---------- */
+.chat {
+  position: fixed;
+  right: 1.25rem;
+  bottom: 1.25rem;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.8rem;
+}
+
+/* Launcher: a round chenille patch */
+.chat-toggle {
+  position: relative;
+  width: 104px;
+  height: 104px;
+  border-radius: 50%;
+  border: none;
+  color: var(--chalk);
+  cursor: pointer;
+  box-shadow:
+    0 0 0 4px var(--chalk),
+    0 10px 24px rgba(0, 37, 80, 0.35);
+  transform: rotate(-6deg);
+  transition: transform 0.25s cubic-bezier(0.3, 1.6, 0.5, 1);
+  font: inherit;
+}
+
+.chat-toggle:hover {
+  transform: rotate(0deg) scale(1.04);
+}
+
+.patch-ring {
+  position: absolute;
+  inset: 7px;
+  border-radius: 50%;
+  border: var(--stitch);
+}
+
+.patch-label {
+  position: relative;
+  display: block;
+  font-family: var(--varsity);
+  font-size: 0.95rem;
+  line-height: 1.05;
+  padding: 0 14px;
+}
+
+.chat-toggle.is-open {
+  width: 64px;
+  height: 64px;
+  transform: rotate(0);
+}
+
+.chat-toggle.is-open .patch-label {
+  font-size: 0.78rem;
+  padding: 0;
+}
+
+.chat-toggle.is-open .patch-ring {
+  inset: 5px;
+}
+
+.chat-panel {
+  width: min(380px, calc(100vw - 2.5rem));
+  height: min(560px, calc(100vh - 140px));
+  background: var(--chalk);
+  border-radius: 10px;
+  box-shadow: 0 22px 50px rgba(0, 37, 80, 0.3);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transform-origin: bottom right;
+  animation: panel-open 0.22s ease-out;
+}
+
+@keyframes panel-open {
+  from {
+    opacity: 0;
+    transform: scale(0.92) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.chat-header {
+  color: var(--chalk);
+  padding: 0.95rem 1.05rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+  position: relative;
+}
+
+.chat-header::after {
+  content: '';
+  position: absolute;
+  inset: 5px;
+  border: 1.5px dashed rgba(255, 255, 255, 0.45);
+  border-radius: 6px;
+  pointer-events: none;
+}
+
+.chat-header > div:first-child {
+  display: flex;
+  flex-direction: column;
+}
+
+.chat-header strong {
+  font-family: var(--varsity);
+  font-weight: 400;
+  font-size: 1.1rem;
+}
+
+.chat-header span {
+  font-size: 0.8rem;
+  opacity: 0.8;
+}
+
+.chat-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  position: relative;
+  z-index: 1;
+}
+
+.chat-clear {
+  font: inherit;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--chalk);
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 6px;
+  padding: 0.2rem 0.5rem;
+  cursor: pointer;
+}
+
+.chat-close {
+  background: none;
+  border: none;
+  color: var(--chalk);
+  font-size: 1.6rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  background-color: var(--heather);
+  background-image: var(--noise);
+  background-size: 160px;
+  background-blend-mode: soft-light;
+}
+
+.turn {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.turn-user {
+  align-items: flex-end;
+}
+
+.turn-assistant {
+  align-items: flex-start;
+}
+
+.bubble {
+  max-width: 86%;
+  padding: 0.65rem 0.9rem;
+  border-radius: 10px;
+  font-size: 0.93rem;
+  white-space: pre-wrap;
+  animation: bubble-in 0.18s ease-out;
+}
+
+@keyframes bubble-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+}
+
+.bubble-assistant {
+  background: var(--chalk);
+  border-left: 3px solid var(--yale);
+  border-bottom-left-radius: 3px;
+}
+
+.bubble-user {
+  background: var(--yale);
+  color: var(--chalk);
+  border-bottom-right-radius: 3px;
+}
+
+.bubble-notice {
+  align-self: stretch;
+  max-width: 100%;
+  background: #fff6df;
+  border-left-color: #c79a1c;
+  color: #5e4500;
+  font-size: 0.82rem;
+}
+
+.bubble-typing {
+  color: var(--muted);
+  font-style: italic;
+}
+
+/* A thread being pulled while the agent works */
+.bubble-typing::after {
+  content: '';
+  display: inline-block;
+  width: 26px;
+  margin-left: 6px;
+  border-top: 2px dashed var(--yale);
+  vertical-align: middle;
+  animation: thread 0.9s linear infinite;
+}
+
+@keyframes thread {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+/* "12 items: Hoodies" note is a little kraft tag */
+.chat-shown {
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--kraft-ink);
+  background: var(--kraft);
+  border: none;
+  clip-path: polygon(10px 0, 100% 0, 100% 100%, 10px 100%, 0 50%);
+  padding: 0.3rem 0.75rem 0.3rem 1.05rem;
+  cursor: pointer;
+  max-width: 86%;
+  text-align: left;
+}
+
+/* Quick-start chips */
+.chat-chips {
+  display: flex;
+  gap: 0.4rem;
+  overflow-x: auto;
+  padding: 0.6rem 0.75rem 0;
+  border-top: 1px solid var(--line);
+  scrollbar-width: none;
+}
+
+.chat-chips::-webkit-scrollbar {
+  display: none;
+}
+
+.chat-chip {
+  flex-shrink: 0;
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--yale);
+  background: var(--chalk);
+  border: 1.5px dashed rgba(0, 53, 107, 0.45);
+  border-radius: 999px;
+  padding: 0.3rem 0.75rem;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.chat-chip:hover {
+  background: #edf2f8;
+  border-style: solid;
+}
+
+.chat-chip:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.chat-input {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.6rem 0.75rem 0.75rem;
+}
+
+.chat-input input {
+  flex: 1;
+  font: inherit;
+  font-size: 0.93rem;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  min-width: 0;
+}
+
+.chat-input button {
+  font: inherit;
+  font-weight: 700;
+  background: var(--yale);
+  color: var(--chalk);
+  border: none;
+  border-radius: 6px;
+  padding: 0 1.05rem;
+  cursor: pointer;
+  box-shadow: 0 2px 0 var(--yale-deep);
+}
+
+.chat-input button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+/* ---------- Small screens ---------- */
+@media (max-width: 800px) {
+  .detail {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .detail-image {
+    position: static;
+  }
+
+  .hero-inner {
+    padding: 2.5rem 1.25rem 3rem;
+  }
+
+  .row {
+    grid-template-columns: 1fr;
+  }
+
+  .chat-toggle {
+    width: 84px;
+    height: 84px;
+  }
+
+  .patch-label {
+    font-size: 0.8rem;
+  }
+
+  .grid {
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 1.75rem 1rem;
+  }
+
+  .chat-results-head {
+    flex-direction: column;
+  }
+}
+
+/* ---------- Respect reduced motion ---------- */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}

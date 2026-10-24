@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Campus Customs: App Check (Problem 11)</title>
+<style>
+  :root {
+    --yale: #00356b;
+    --ink: #10233f;
+    --muted: #56657a;
+    --heather: #e6e9ee;
+    --kraft: #d9b985;
+    --ok: #24613f;
+    --line: #d3d9e2;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: "Libre Franklin", "Franklin Gothic Medium", "Helvetica Neue", Arial, sans-serif;
+    color: var(--ink);
+    background: var(--heather);
+    line-height: 1.55;
+  }
+  header {
+    background: var(--yale);
+    color: #fff;
+    padding: 2.25rem 1.25rem 2rem;
+    border-bottom: 2px dashed rgba(255, 255, 255, 0.6);
+  }
+  header div, main { max-width: 980px; margin: 0 auto; }
+  h1, h2 { font-family: "Graduate", Rockwell, Georgia, serif; font-weight: 400; line-height: 1.1; }
+  h1 { font-size: 2.2rem; margin: 0 0 0.5rem; }
+  header p { margin: 0.25rem 0; opacity: 0.9; max-width: 70ch; }
+  main { padding: 2rem 1.25rem 4rem; }
+  nav.toc { background: #fff; border-radius: 6px; padding: 1rem 1.25rem; outline: 2px dashed rgba(0, 53, 107, 0.4); outline-offset: -8px; }
+  nav.toc ol { margin: 0.4rem 0 0; padding-left: 1.4rem; }
+  nav.toc a { color: var(--yale); font-weight: 700; }
+  section.check { margin-top: 3rem; }
+  section.check > h2 { font-size: 1.6rem; margin: 0 0 0.35rem; color: var(--yale); }
+  .result { display: inline-block; background: var(--ok); color: #fff; font-weight: 700; font-size: 0.85rem; padding: 0.15rem 0.6rem; border-radius: 4px; margin-bottom: 0.75rem; }
+  .asked { margin: 0 0 1rem; color: var(--muted); }
+  figure { margin: 1.25rem 0 0; background: #fff; border-radius: 6px; padding: 0.75rem; box-shadow: 0 1px 0 var(--line); }
+  figure img { display: block; width: 100%; height: auto; border-radius: 4px; border: 1px solid var(--line); }
+  figure.narrow img { max-width: 440px; margin: 0 auto; }
+  figcaption { padding: 0.75rem 0.25rem 0.1rem; font-size: 0.98rem; }
+  figcaption strong { color: var(--yale); }
+  table { width: 100%; border-collapse: collapse; margin: 1rem 0 0; background: #fff; font-size: 0.92rem; }
+  th, td { text-align: left; padding: 0.5rem 0.7rem; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { background: #f3f5f8; }
+  td.ok { color: var(--ok); font-weight: 700; white-space: nowrap; }
+  code { background: #f3f5f8; padding: 0.05rem 0.3rem; border-radius: 3px; font-size: 0.88em; }
+  header code { background: rgba(255, 255, 255, 0.16); color: #fff; }
+  .summary { margin-top: 3rem; background: var(--kraft); color: #3a2c12; padding: 1.25rem 1.5rem; border-radius: 4px; }
+  .summary h2 { margin: 0 0 0.5rem; font-size: 1.4rem; color: var(--ink); }
+  .summary ul { margin: 0; padding-left: 1.2rem; }
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>Campus Customs: App Check</h1>
+    <p>MGT 409 HW4, Problem 11. Every screenshot is from the <strong>running app</strong> on my Mac (React + Vite site on <code>localhost:5173</code>, FastAPI backend on <code>localhost:8000</code>), with the PydanticAI agent calling the course model <code>gpt-5.6-terra</code> through Portkey. Tested Oct 23, 2026, logged in as my own account.</p>
+    <p>Each number the chat quoted was checked against <code>data/campus_customs.db</code> with a direct SQL query. Those results are in the table under each check.</p>
+  </div>
+</header>
+
+<main>
+  <nav class="toc" aria-label="Checks on this page">
+    <strong>Checks</strong>
+    <ol>
+      <li><a href="#inventory">Chat checks an item's inventory (honest stock + price from the database)</a></li>
+      <li><a href="#cards">A category question puts dynamic product cards on the page</a></li>
+      <li><a href="#usability">Problem 9 usability features in the running app</a></li>
+    </ol>
+  </nav>
+
+  <!-- ============================================================ 1 -->
+  <section class="check" id="inventory">
+    <h2>1. Chat checks an item's inventory</h2>
+    <span class="result">Pass</span>
+    <p class="asked">On the <strong>Basic Hoodie Big Yale</strong> product page I asked "do you have this in pink", then "is it in stock in medium".</p>
+
+    <figure>
+      <img src="app_check_images/1_inventory_product_page.png" alt="Product page for Basic Hoodie Big Yale ($68.00) with the chat open. The bot says the hoodie only comes in navy blue and white, not pink, then says only 5 are left in medium." />
+      <figcaption><strong>What this proves:</strong> the agent called <code>check_stock</code> and answered "only 5 left in medium", which is the exact database count, flagged as low stock. It knew "this" and "it" meant the hoodie on screen (page context from Problem 8) and gave its real colors instead of inventing a pink one.</figcaption>
+    </figure>
+
+    <table>
+      <tr><th>Chat said</th><th>Database says</th><th></th></tr>
+      <tr><td>Only comes in navy blue and white</td><td><code>catalogue.colors</code> = ["navy blue", "white"]</td><td class="ok">Match</td></tr>
+      <tr><td>Only 5 left in medium</td><td><code>inventory</code> M = 5 (XS 15, S 5, L 8, XL 2, XXL 25)</td><td class="ok">Match</td></tr>
+      <tr><td>Page price $68.00</td><td><code>catalogue.price</code> = 68.0</td><td class="ok">Match</td></tr>
+    </table>
+
+    <figure class="narrow">
+      <img src="app_check_images/1b_inventory_filtered_search.png" alt="Chat reply: 19 hoodies are under $70 and in stock in medium; UA Gameday and Yale Tennis hoodies are $45.00, the rest shown are $68.00; Basic Big Yale has only 5 mediums left." />
+      <figcaption><strong>A harder inventory question:</strong> "any hoodies under $70 in medium?" The agent answered from one <code>filter_products</code> call. The count (19), the prices ($45.00 and $68.00), and the low-stock warning all came from the database, not from the model.</figcaption>
+    </figure>
+
+    <table>
+      <tr><th>Chat said</th><th>Database says</th><th></th></tr>
+      <tr><td>19 hoodies under $70 in stock in medium</td><td>19 hoodie products with price ≤ 70 and M quantity &gt; 0</td><td class="ok">Match</td></tr>
+      <tr><td>UA Gameday and Yale Tennis hoodies are $45.00</td><td>Both priced 45.0, the lowest hoodie price</td><td class="ok">Match</td></tr>
+    </table>
+  </section>
+
+  <!-- ============================================================ 2 -->
+  <section class="check" id="cards">
+    <h2>2. A category question puts dynamic product cards on the page</h2>
+    <span class="result">Pass</span>
+    <p class="asked">I asked the chat "what hoodies do you have?"</p>
+
+    <figure>
+      <img src="app_check_images/2_hoodie_cards.png" alt="The page shows a 'From your chat: Hoodies' section with hoodie product cards (Basic Hoodie Big Yale $68.00, Brooks Brothers Double Knit Full Zip Hoodie Yale $88.00, more). The chat says 'Here are our hoodie options' and '12 items shown on the page: Hoodies'." />
+      <figcaption><strong>What this proves:</strong> the agent searched the catalogue and returned product IDs plus the label "Hoodies". The website then showed 12 matching cards (image, name, price, short description) on the main page, without a reload. Each card is built by the backend from the database, so the prices are real ($68.00, $88.00).</figcaption>
+    </figure>
+
+    <figure>
+      <img src="app_check_images/2b_cards_restyled.jpg" alt="After the Problem 10 restyle: a Yale-blue band 'Pulled from the back room for you: Hoodies with sold-out sizes', with products shown as hang-tag cards (Brooks Brothers $88.00, Champion Reverse Weave $68.00, Crew Left Chest Hoodie $68.00)." />
+      <figcaption><strong>Same feature after the Problem 10 design:</strong> a different question ("show the sold out items") put 10 new cards on the page in the felt "Pulled from the back room for you" band. Clicking any of these cards opens that product's single-item page (Problem 3). I tested that too.</figcaption>
+    </figure>
+  </section>
+
+  <!-- ============================================================ 3 -->
+  <section class="check" id="usability">
+    <h2>3. Problem 9 usability features in the running app</h2>
+    <span class="result">Pass</span>
+    <p class="asked">On the Products page I clicked <strong>Hoodies</strong>, set <strong>In stock in</strong> to <strong>M</strong>, and set <strong>Sort</strong> to <strong>Price: low to high</strong>.</p>
+
+    <figure>
+      <img src="app_check_images/3_products_filters.png" alt="Products page showing 21 of 102 items. The Hoodies category chip is selected (21), In stock in = M, Sort = Price: low to high. The first cards are UA Gameday Double Knit Hood $45.00, Yale Sports Hoodie Tennis $45.00, Basic Hoodie Big Yale $68.00." />
+      <figcaption><strong>Front-end feature: Products page filters.</strong> Category buttons with live counts, an "in stock in my size" filter, and a price sort narrowed 102 products to the 21 hoodies available in medium, cheapest first. The counts on the other category buttons update to match the size filter.</figcaption>
+    </figure>
+
+    <table>
+      <tr><th>Page shows</th><th>Database says</th><th></th></tr>
+      <tr><td>Hoodies in stock in M: 21</td><td>21 hoodie products with M quantity &gt; 0</td><td class="ok">Match</td></tr>
+      <tr><td>Cheapest first: $45.00, $45.00, $68.00…</td><td>Lowest hoodie prices 45.0, 45.0, then 68.0</td><td class="ok">Match</td></tr>
+    </table>
+
+    <figure class="narrow">
+      <img src="app_check_images/3b_safety_guardrail.png" alt="Chat: a yellow notice reads 'For your safety, we removed a card number from your message before it was sent or saved.' The bot replies 'Please don't post card details here, I can't take payment in chat' and lists 17 navy hoodies in stock." />
+      <figcaption><strong>Agent/backend feature: safety guardrail.</strong> I typed a test card number (4111 1111 1111 1111). The guardrail removed it before the model or the database saw it, showed the 🔒 notice, and the bot still answered the shopping question (17 navy hoodies, which matches the database). My saved chat history contains <code>[card number removed]</code> and no card digits.</figcaption>
+    </figure>
+
+    <p>The other two Problem 9 features also appear in these screenshots. The <strong>quick-start chips</strong> ("What hoodies do you have?", "Anything under $40?") sit above the chat input in check 3. The <strong><code>filter_products</code> tool</strong> produced the "19 hoodies under $70 in medium" answer in check 1.</p>
+  </section>
+
+  <div class="summary">
+    <h2>Summary</h2>
+    <ul>
+      <li><strong>Inventory:</strong> the stock counts, prices, and colors the chat quoted all match the database. Nothing was invented.</li>
+      <li><strong>Dynamic cards:</strong> a category question put real product cards on the page, and the cards open the detail view.</li>
+      <li><strong>Usability:</strong> the filters, chat chips, <code>filter_products</code>, and the safety guardrail are all visible in the running app.</li>
+    </ul>
+  </div>
+</main>
+</body>
+</html>
